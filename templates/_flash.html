@@ -1,0 +1,19 @@
+{% from "_icons.html" import icone %}
+{% with mensagens = get_flashed_messages(with_categories=true) %}
+  {% if mensagens %}
+    <div class="flash-stack" role="status" aria-live="polite">
+      {% for categoria, mensagem in mensagens %}
+        {% set tipo = categoria if categoria in ['success', 'error', 'warning', 'info'] else 'info' %}
+        <div class="flash flash--{{ tipo }}">
+          <span class="flash__icon">
+            {{ icone('check' if tipo == 'success' else ('alert' if tipo in ['error', 'warning'] else 'info')) }}
+          </span>
+          <span class="flash__text">{{ mensagem }}</span>
+          <button type="button" class="flash__close" data-flash-close aria-label="Fechar aviso">
+            {{ icone('x') }}
+          </button>
+        </div>
+      {% endfor %}
+    </div>
+  {% endif %}
+{% endwith %}

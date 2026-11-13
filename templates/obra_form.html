@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}{{ 'Nova obra' if modo == 'nova' else 'Editar obra' }}{% endblock %}
+{% block trilha %}{{ 'Nova obra' if modo == 'nova' else 'Editar obra' }}{% endblock %}
+
+{% block conteudo %}
+<div class="page-head page-head--compact">
+  <div>
+    <a href="{{ url_for('web.obra_detalhe', obra_id=obra.id) if modo == 'editar' else url_for('web.obras') }}" class="back-link">
+      {{ icone('arrow-left') }} Voltar
+    </a>
+    <h1>{{ 'Cadastrar nova obra' if modo == 'nova' else 'Editar obra' }}</h1>
+    <p class="page-sub">
+      {{ 'Preencha as informações do novo projeto.' if modo == 'nova' else 'Atualize as informações desta obra.' }}
+    </p>
+  </div>
+</div>
+
+{% if erros %}
+  <div class="alert alert--error" role="alert">
+    <span class="alert__icon">{{ icone('alert') }}</span>
+    <div>
+      <strong>Não foi possível salvar. Confira os campos:</strong>
+      <ul>
+        {% for erro in erros %}<li>{{ erro }}</li>{% endfor %}
+      </ul>
+    </div>
+  </div>
+{% endif %}
+
+<form method="post"
+      action="{{ url_for('web.editar_obra', obra_id=obra.id) if modo == 'editar' else url_for('web.nova_obra') }}"
+      class="form-card" novalidate>
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+  <section class="form-section">
+    <header class="form-section__head">
+      <span class="form-section__icon">{{ icone('building') }}</span>
+      <div>
+        <h2>Informações da obra</h2>
+        <p>Identifique o projeto e o cliente atendido.</p>
+      </div>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="field field--span">
+        <label for="nome">Nome da obra <span class="required">*</span></label>
+        <input id="nome" name="nome" type="text" class="input"
+               value="{{ form.get('nome', '') }}" placeholder="Ex.: Residência Moderna"
+               required autofocus>
+      </div>
+
+      <div class="field">
+        <label for="cliente_id">Cliente</label>
+        <select id="cliente_id" name="cliente_id" class="input">
+          <option value="">Sem cliente vinculado</option>
+          {% for cliente in clientes %}
+            <option value="{{ cliente.id }}"
+              {{ 'selected' if form.get('cliente_id')|string == cliente.id|string }}>
+              {{ cliente.nome }}
+            </option>
+          {% endfor %}
+        </select>
+        <span class="field__hint">O cliente pode ser definido depois.</span>
+      </div>
+
+      <div class="field">
+        <label for="engenheiro_id">Engenheiro responsável <span class="required">*</span></label>
+        {% if usuario_logado.eh_engenheiro() %}
+          <div class="readonly-box">
+            <span class="avatar avatar--xs">{{ iniciais(usuario_logado.nome) }}</span>
+            <span>
+              <strong>{{ usuario_logado.nome }}</strong>
+              <small>Você é o responsável por esta obra</small>
+            </span>
+            <input type="hidden" name="engenheiro_id" value="{{ usuario_logado.id }}">
+          </div>
+        {% else %}
+          <select id="engenheiro_id" name="engenheiro_id" class="input" required>
+            <option value="">Selecione um engenheiro</option>
+            {% for engenheiro in engenheiros %}
+              <option value="{{ engenheiro.id }}"
+                {{ 'selected' if form.get('engenheiro_id')|string == engenheiro.id|string }}>
+                {{ engenheiro.nome }}
+              </option>
+            {% endfor %}
+          </select>
+          <span class="field__hint">Somente usuários com profissão Engenheiro aparecem aqui.</span>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+
+  <section class="form-section">
+    <header class="form-section__head">
+      <span class="form-section__icon form-section__icon--orange">{{ icone('calendar') }}</span>
+      <div>
+        <h2>Prazo e descrição</h2>
+        <p>Defina o período de execução e os detalhes do projeto.</p>
+      </div>
+    </header>
+
+    <div class="form-grid form-grid--two">
+      <div class="field">
+        <label for="data_inicio">Data de início <span class="required">*</span></label>
+        <input id="data_inicio" name="data_inicio" type="date" class="input"
+               value="{{ data_iso(form.get('data_inicio')) }}" required>
+      </div>
+
+      <div class="field">
+        <label for="data_fim">Previsão de término</label>
+        <input id="data_fim" name="data_fim" type="date" class="input"
+               value="{{ data_iso(form.get('data_fim')) }}">
+        <span class="field__hint">Pode ficar em branco se ainda não houver prazo.</span>
+      </div>
+
+      <div class="field field--span">
+        <label for="descricao">Descrição</label>
+        <textarea id="descricao" name="descricao" class="input textarea" rows="5"
+                  placeholder="Conte um pouco sobre o escopo, materiais e etapas da obra...">{{ form.get('descricao', '') }}</textarea>
+      </div>
+    </div>
+  </section>
+
+  <footer class="form-actions">
+    <a href="{{ url_for('web.obra_detalhe', obra_id=obra.id) if modo == 'editar' else url_for('web.obras') }}"
+       class="button button--ghost">Cancelar</a>
+    <button type="submit" class="button button--primary">
+      {{ icone('check') }} {{ 'Salvar alterações' if modo == 'editar' else 'Cadastrar obra' }}
+    </button>
+  </footer>
+</form>
+{% endblock %}

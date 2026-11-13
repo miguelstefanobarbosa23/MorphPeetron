@@ -1,0 +1,62 @@
+"""DAO da tabela 'equipamentos' (CRUD em SQL puro)."""
+from models import Equipamento
+
+from .base_dao import BaseDAO
+
+
+class EquipamentoDAO(BaseDAO):
+    """Acesso a dados de equipamentos."""
+
+    # ------------------------------ CREATE ------------------------------
+    def inserir(self, equipamento):
+        """Insere o equipamento, preenche equipamento.id e devolve o novo id."""
+        sql = """
+            INSERT INTO equipamentos (nome, status, data_ultima_manutencao, responsavel_id)
+            VALUES (?, ?, ?, ?)
+        """
+        equipamento.id, _ = self._executar(
+            sql, (equipamento.nome, equipamento.status,
+                  equipamento.data_ultima_manutencao, equipamento.responsavel_id))
+        return equipamento.id
+
+    # ------------------------------- READ -------------------------------
+    def buscar_por_id(self, equipamento_id):
+        linha = self._buscar_um("SELECT * FROM equipamentos WHERE id = ?", (equipamento_id,))
+        return Equipamento.from_row(linha)
+
+    def listar_todos(self, status=None):
+        """Lista os equipamentos. Filtro opcional por status ('Ativo' / 'Em manutenção')."""
+        sql = "SELECT * FROM equipamentos"
+        params = ()
+        if status:
+            sql += " WHERE status = ?"
+            params = (status,)
+        sql += " ORDER BY nome"
+        return [Equipamento.from_row(linha) for linha in self._buscar_varios(sql, params)]
+
+    # ------------------------------ UPDATE ------------------------------
+    def atualizar(self, equipamento):
+        """Atualiza todos os campos editáveis. Verifique a existência antes (buscar_por_id)."""
+        sql = """
+            UPDATE equipamentos
+               SET nome = ?, status = ?, data_ultima_manutencao = ?, responsavel_id = ?
+             WHERE id = ?
+        """
+        self._executar(
+            sql, (equipamento.nome, equipamento.status, equipamento.data_ultima_manutencao,
+                  equipamento.responsavel_id, equipamento.id))
+
+    def atualizar_status(self, equipamento_id, status, data_ultima_manutencao):
+        """Atualiza somente status e data da última manutenção (usado pela tela de equipamentos)."""
+        sql = """
+            UPDATE equipamentos
+               SET status = ?, data_ultima_manutencao = ?
+             WHERE id = ?
+        """
+        self._executar(sql, (status, data_ultima_manutencao, equipamento_id))
+
+    # ------------------------------ DELETE ------------------------------
+    def deletar(self, equipamento_id):
+        """Remove o equipamento. Retorna True se havia um registro para remover."""
+        _, linhas = self._executar("DELETE FROM equipamentos WHERE id = ?", (equipamento_id,))
+        return linhas > 0

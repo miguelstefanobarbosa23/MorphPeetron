@@ -1,0 +1,73 @@
+{% extends "auth_base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Entrar{% endblock %}
+
+{% block conteudo %}
+<div class="auth-card">
+  <header class="auth-card__head">
+    <p class="eyebrow">Acesse sua conta</p>
+    <h1>Bem-vindo de volta</h1>
+    <p>Entre para acompanhar suas obras, clientes e equipamentos.</p>
+  </header>
+
+  <form method="post" action="{{ url_for('web.login') }}" class="auth-form" novalidate>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+    {% if request.args.get('next') %}
+      <input type="hidden" name="next" value="{{ request.args.get('next') }}">
+    {% endif %}
+
+    <div class="field">
+      <label for="email">E-mail</label>
+      <div class="input-wrap">
+        <span class="input-wrap__icon">{{ icone('mail') }}</span>
+        <input id="email" name="email" type="email" class="input input--with-icon"
+               value="{{ email or '' }}" placeholder="voce@empresa.com"
+               autocomplete="email" required autofocus>
+      </div>
+    </div>
+
+    <div class="field">
+      <label for="senha">Senha</label>
+      <div class="input-wrap">
+        <span class="input-wrap__icon">{{ icone('lock') }}</span>
+        <input id="senha" name="senha" type="password" class="input input--with-icon input--with-action"
+               placeholder="Sua senha" autocomplete="current-password" required>
+        <button type="button" class="input-action" data-password-toggle aria-label="Mostrar senha">
+          {{ icone('eye', 'icone input-action__eye') }}
+          {{ icone('eye-off', 'icone input-action__eye-off') }}
+        </button>
+      </div>
+    </div>
+
+    <button type="submit" class="button button--primary button--block">
+      Entrar
+      {{ icone('arrow-right', 'icone button__icon') }}
+    </button>
+  </form>
+
+  <p class="auth-switch">Não tem uma conta? <a href="{{ url_for('web.cadastro') }}">Cadastre-se</a></p>
+
+  <div class="demo-box">
+    <div class="demo-box__head">
+      {{ icone('info') }}
+      <strong>Contas de demonstração</strong>
+    </div>
+    <p>Clique em uma conta para preencher o formulário automaticamente.</p>
+    <div class="demo-box__actions">
+      <button type="button" class="demo-account"
+              data-demo-email="engenheiro@morphpeetron.com"
+              data-demo-password="engenheiro123">
+        <span class="avatar avatar--xs">ED</span>
+        <span><strong>Engenheiro</strong><small>engenheiro@morphpeetron.com</small></span>
+      </button>
+      <button type="button" class="demo-account"
+              data-demo-email="admin@morphpeetron.com"
+              data-demo-password="admin123">
+        <span class="avatar avatar--xs avatar--accent">MS</span>
+        <span><strong>Administrador</strong><small>admin@morphpeetron.com</small></span>
+      </button>
+    </div>
+  </div>
+</div>
+{% endblock %}

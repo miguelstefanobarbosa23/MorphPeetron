@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Obras{% endblock %}
+{% block trilha %}Obras{% endblock %}
+
+{% block conteudo %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Projetos</p>
+    <h1>{{ 'Minhas obras' if usuario_logado.eh_engenheiro() else 'Obras' }}</h1>
+    <p class="page-sub">
+      {{ total }} {{ 'obra encontrada' if total == 1 else 'obras encontradas' }}
+      {% if q %}para “{{ q }}”{% endif %}.
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('web.nova_obra') }}" class="button button--primary">
+      {{ icone('plus') }} Nova obra
+    </a>
+  </div>
+</section>
+
+<div class="toolbar">
+  <form action="{{ url_for('web.obras') }}" method="get" class="search" role="search">
+    {{ icone('search') }}
+    <label class="visually-hidden" for="busca-obras">Buscar obras</label>
+    <input id="busca-obras" type="search" name="q" value="{{ q }}"
+           placeholder="Buscar por obra, cliente ou engenheiro..." autocomplete="off">
+    {% if q %}
+      <a href="{{ url_for('web.obras') }}" class="search__clear" aria-label="Limpar busca">{{ icone('x') }}</a>
+    {% endif %}
+  </form>
+  <span class="toolbar__hint">{{ icone('filter') }} Exibindo {{ obras|length }} de {{ total }}</span>
+</div>
+
+{% if obras %}
+  <section class="obra-grid" aria-label="Lista de obras">
+    {% for obra in obras %}
+      {% set status = status_obra(obra) %}
+      <article class="obra-card">
+        <a href="{{ url_for('web.obra_detalhe', obra_id=obra.id) }}" class="obra-card__cover"
+           aria-label="Abrir obra {{ obra.nome }}">
+          <span class="obra-card__pattern" aria-hidden="true"></span>
+          <span class="obra-card__cover-icon">{{ icone('building') }}</span>
+          <span class="badge badge--{{ status.classe }}">{{ status.rotulo }}</span>
+          <span class="obra-card__number">#{{ '%03d'|format(obra.id) }}</span>
+        </a>
+
+        <div class="obra-card__body">
+          <h2 class="obra-card__title">
+            <a href="{{ url_for('web.obra_detalhe', obra_id=obra.id) }}">{{ obra.nome }}</a>
+          </h2>
+          <p class="obra-card__client">
+            {{ icone('users') }}
+            <span>{{ obra.cliente_nome or 'Cliente não informado' }}</span>
+          </p>
+
+          <dl class="obra-card__meta">
+            <div>
+              <dt>{{ icone('calendar') }} Período</dt>
+              <dd>{{ formatar_data(obra.data_inicio) }} a {{ formatar_data(obra.data_fim) }}</dd>
+            </div>
+            <div>
+              <dt>{{ icone('hardhat') }} Responsável</dt>
+              <dd>{{ obra.engenheiro_nome }}</dd>
+            </div>
+          </dl>
+        </div>
+
+        <footer class="obra-card__footer">
+          <a href="{{ url_for('web.obra_detalhe', obra_id=obra.id) }}" class="link-arrow">
+            Abrir obra {{ icone('arrow-right') }}
+          </a>
+        </footer>
+      </article>
+    {% endfor %}
+  </section>
+
+  {% if paginas > 1 %}
+    <nav class="pagination" aria-label="Paginação de obras">
+      <a href="{{ url_for('web.obras', pagina=pagina-1, q=q) }}"
+         class="pagination__btn {{ 'is-disabled' if pagina == 1 }}"
+         aria-label="Página anterior" {% if pagina == 1 %}tabindex="-1" aria-disabled="true"{% endif %}>
+        {{ icone('chevron-left') }}
+      </a>
+
+      {% for numero in range(1, paginas + 1) %}
+        <a href="{{ url_for('web.obras', pagina=numero, q=q) }}"
+           class="pagination__page {{ 'is-active' if numero == pagina }}"
+           {% if numero == pagina %}aria-current="page"{% endif %}>{{ numero }}</a>
+      {% endfor %}
+
+      <a href="{{ url_for('web.obras', pagina=pagina+1, q=q) }}"
+         class="pagination__btn {{ 'is-disabled' if pagina == paginas }}"
+         aria-label="Próxima página" {% if pagina == paginas %}tabindex="-1" aria-disabled="true"{% endif %}>
+        {{ icone('chevron-right') }}
+      </a>
+    </nav>
+  {% endif %}
+{% else %}
+  <div class="empty-state">
+    <span class="empty-state__icon">{{ icone('building') }}</span>
+    <h2>{{ 'Nenhuma obra encontrada' if q else 'Comece pela primeira obra' }}</h2>
+    <p>
+      {% if q %}
+        Não encontramos obras para “{{ q }}”. Tente outro termo ou limpe a busca.
+      {% else %}
+        Cadastre uma obra para acompanhar prazos, clientes e responsáveis.
+      {% endif %}
+    </p>
+    {% if q %}
+      <a href="{{ url_for('web.obras') }}" class="button button--soft">Limpar busca</a>
+    {% else %}
+      <a href="{{ url_for('web.nova_obra') }}" class="button button--primary">{{ icone('plus') }} Nova obra</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

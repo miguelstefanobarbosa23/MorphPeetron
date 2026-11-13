@@ -1,0 +1,63 @@
+{% from "_icons.html" import icone %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MorphPeetron - gestão de obras, clientes e equipamentos.">
+  <title>{% block titulo %}Visão geral{% endblock %} · MorphPeetron</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/m-tron.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="app-body">
+  <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+
+  <div class="app-shell">
+    {% include "_sidebar.html" %}
+
+    <div class="app-main">
+      <header class="topbar">
+        <div class="topbar__left">
+          <button type="button" class="icon-button topbar__menu" data-sidebar-toggle aria-label="Abrir menu" aria-controls="sidebar">
+            {{ icone('menu') }}
+          </button>
+          <nav class="breadcrumb" aria-label="Trilha de navegação">
+            <a href="{{ url_for('web.dashboard') }}">MorphPeetron</a>
+            <span class="breadcrumb__sep">/</span>
+            <span aria-current="page">{% block trilha %}Visão geral{% endblock %}</span>
+          </nav>
+        </div>
+
+        <div class="topbar__right">
+          <form class="topbar-search" action="{{ url_for('web.obras') }}" method="get" role="search">
+            {{ icone('search') }}
+            <label class="visually-hidden" for="busca-topo">Buscar obras</label>
+            <input id="busca-topo" type="search" name="q" placeholder="Buscar obras..." autocomplete="off">
+          </form>
+
+          {% if usuario_logado %}
+            <a href="{{ url_for('web.perfil') }}" class="user-chip">
+              <span class="avatar avatar--sm">{{ iniciais(usuario_logado.nome) }}</span>
+              <span class="user-chip__text">
+                <strong>{{ usuario_logado.nome.split()[0] }}</strong>
+                <small>{{ usuario_logado.profissao }}</small>
+              </span>
+            </a>
+          {% endif %}
+        </div>
+      </header>
+
+      <main id="conteudo" class="page">
+        {% include "_flash.html" %}
+        {% block conteudo %}{% endblock %}
+      </main>
+    </div>
+  </div>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

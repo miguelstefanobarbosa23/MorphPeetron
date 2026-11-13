@@ -1,0 +1,161 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}{{ obra.nome }}{% endblock %}
+{% block trilha %}Obras / Detalhes{% endblock %}
+
+{% block conteudo %}
+{% set status = status_obra(obra) %}
+
+<div class="page-head page-head--compact">
+  <div>
+    <a href="{{ url_for('web.obras') }}" class="back-link">{{ icone('arrow-left') }} Voltar para obras</a>
+    <div class="title-with-badge">
+      <h1>{{ obra.nome }}</h1>
+      <span class="badge badge--{{ status.classe }}">{{ status.rotulo }}</span>
+    </div>
+    <p class="page-sub">{{ obra.cliente_nome or 'Cliente não informado' }} · Responsável: {{ obra.engenheiro_nome }}</p>
+  </div>
+
+  {% if pode_editar %}
+    <div class="page-actions">
+      <a href="{{ url_for('web.editar_obra', obra_id=obra.id) }}" class="button button--ghost">
+        {{ icone('edit') }} Editar
+      </a>
+      <form method="post" action="{{ url_for('web.excluir_obra', obra_id=obra.id) }}"
+            data-confirm="Tem certeza que deseja excluir a obra “{{ obra.nome }}”? Essa ação não pode ser desfeita.">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="button button--danger-soft">
+          {{ icone('trash') }} Excluir
+        </button>
+      </form>
+    </div>
+  {% endif %}
+</div>
+
+<div class="detail-grid">
+  <div class="detail-main">
+    <section class="detail-hero">
+      <span class="detail-hero__pattern" aria-hidden="true"></span>
+      <span class="detail-hero__icon">{{ icone('building') }}</span>
+      <div class="detail-hero__text">
+        <span class="detail-hero__label">Projeto</span>
+        <strong>{{ obra.nome }}</strong>
+        <span>{{ obra.cliente_nome or 'Cliente não informado' }}</span>
+      </div>
+      <span class="detail-hero__number">#{{ '%03d'|format(obra.id) }}</span>
+    </section>
+
+    {% if progresso is not none %}
+      <section class="card">
+        <div class="card__head card__head--inline">
+          <div>
+            <h2>Andamento do prazo</h2>
+            <p>Percentual do período previsto já transcorrido.</p>
+          </div>
+          <strong class="progress__value">{{ progresso }}%</strong>
+        </div>
+        <div class="progress" role="progressbar" aria-valuenow="{{ progresso }}" aria-valuemin="0" aria-valuemax="100"
+             aria-label="Andamento do prazo da obra">
+          <span class="progress__bar" style="width: {{ progresso }}%"></span>
+        </div>
+        <div class="progress__legend">
+          <span>{{ icone('calendar') }} {{ formatar_data(obra.data_inicio) }}</span>
+          <span>{{ formatar_data(obra.data_fim) }} {{ icone('calendar') }}</span>
+        </div>
+      </section>
+    {% endif %}
+
+    <section class="card">
+      <header class="card__head">
+        <div>
+          <h2>Sobre a obra</h2>
+          <p>Descrição e informações gerais do projeto.</p>
+        </div>
+      </header>
+      <p class="description-text">
+        {{ obra.descricao or 'Nenhuma descrição foi adicionada a esta obra ainda.' }}
+      </p>
+
+      <dl class="info-grid">
+        <div class="info-item">
+          <dt>{{ icone('users') }} Cliente</dt>
+          <dd>{{ obra.cliente_nome or 'Não informado' }}</dd>
+        </div>
+        <div class="info-item">
+          <dt>{{ icone('hardhat') }} Engenheiro responsável</dt>
+          <dd>{{ obra.engenheiro_nome }}</dd>
+        </div>
+        <div class="info-item">
+          <dt>{{ icone('calendar') }} Início</dt>
+          <dd>{{ formatar_data(obra.data_inicio) }}</dd>
+        </div>
+        <div class="info-item">
+          <dt>{{ icone('clock') }} Término previsto</dt>
+          <dd>{{ formatar_data(obra.data_fim) }}</dd>
+        </div>
+      </dl>
+    </section>
+  </div>
+
+  <aside class="detail-side">
+    <section class="card">
+      <header class="card__head">
+        <div>
+          <h2>Ficha rápida</h2>
+          <p>Resumo do cadastro.</p>
+        </div>
+      </header>
+
+      <ul class="summary-list">
+        <li>
+          <span class="summary-list__label">Status</span>
+          <span class="badge badge--{{ status.classe }}">{{ status.rotulo }}</span>
+        </li>
+        <li>
+          <span class="summary-list__label">Cliente</span>
+          <strong>{{ obra.cliente_nome or '—' }}</strong>
+        </li>
+        <li>
+          <span class="summary-list__label">Engenheiro</span>
+          <strong>{{ obra.engenheiro_nome }}</strong>
+        </li>
+        <li>
+          <span class="summary-list__label">Cadastrada em</span>
+          <strong>{{ formatar_data(obra.criado_em) }}</strong>
+        </li>
+      </ul>
+    </section>
+
+    {% if outras_do_cliente %}
+      <section class="card">
+        <header class="card__head">
+          <div>
+            <h2>Outras obras do cliente</h2>
+            <p>Projetos ligados a {{ obra.cliente_nome }}.</p>
+          </div>
+        </header>
+        <ul class="mini-list">
+          {% for outra in outras_do_cliente %}
+            {% set status_outra = status_obra(outra) %}
+            <li>
+              <a href="{{ url_for('web.obra_detalhe', obra_id=outra.id) }}">
+                <span class="mini-list__icon">{{ icone('building') }}</span>
+                <span class="mini-list__text">
+                  <strong>{{ outra.nome }}</strong>
+                  <small>{{ formatar_data(outra.data_inicio) }} · {{ status_outra.rotulo }}</small>
+                </span>
+                {{ icone('chevron-right') }}
+              </a>
+            </li>
+          {% endfor %}
+        </ul>
+      </section>
+    {% endif %}
+
+    <a href="{{ url_for('web.nova_obra') }}" class="button button--soft button--block">
+      {{ icone('plus') }} Cadastrar outra obra
+    </a>
+  </aside>
+</div>
+{% endblock %}

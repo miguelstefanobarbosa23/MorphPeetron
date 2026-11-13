@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Meu perfil{% endblock %}
+{% block trilha %}Meu perfil{% endblock %}
+
+{% block conteudo %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Conta</p>
+    <h1>Meu perfil</h1>
+    <p class="page-sub">Informações da sua conta no MorphPeetron.</p>
+  </div>
+</section>
+
+<div class="profile-grid">
+  <section class="profile-card">
+    <span class="avatar avatar--xl">{{ iniciais(usuario_logado.nome) }}</span>
+    <h2>{{ usuario_logado.nome }}</h2>
+    <span class="badge badge--andamento">{{ usuario_logado.profissao }}</span>
+    <p class="profile-card__email">{{ icone('mail') }} {{ usuario_logado.email }}</p>
+
+    <dl class="profile-facts">
+      <div>
+        <dt>{{ icone('shield') }} Tipo de acesso</dt>
+        <dd>{{ usuario_logado.profissao }}</dd>
+      </div>
+      <div>
+        <dt>{{ icone('calendar') }} Conta criada em</dt>
+        <dd>{{ formatar_data(usuario_logado.criado_em) }}</dd>
+      </div>
+      <div>
+        <dt>{{ icone('user') }} Identificador</dt>
+        <dd>#{{ '%03d'|format(usuario_logado.id) }}</dd>
+      </div>
+    </dl>
+
+    <form method="post" action="{{ url_for('web.logout') }}">
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="button button--ghost button--block">
+        {{ icone('logout') }} Sair da conta
+      </button>
+    </form>
+  </section>
+
+  <section class="card profile-info">
+    <header class="card__head">
+      <div>
+        <h2>Como o acesso funciona</h2>
+        <p>Segurança e permissões da sua conta.</p>
+      </div>
+    </header>
+
+    <ul class="feature-list">
+      <li>
+        <span class="feature-list__icon">{{ icone('lock') }}</span>
+        <div>
+          <strong>Senha protegida</strong>
+          <p>Sua senha é guardada apenas como hash PBKDF2, nunca em texto puro.</p>
+        </div>
+      </li>
+      <li>
+        <span class="feature-list__icon">{{ icone('shield') }}</span>
+        <div>
+          <strong>Sessão segura</strong>
+          <p>O acesso do navegador expira quando você sai da conta ou fecha a sessão.</p>
+        </div>
+      </li>
+      <li>
+        <span class="feature-list__icon">{{ icone('building') }}</span>
+        <div>
+          <strong>Permissões por perfil</strong>
+          <p>Engenheiros acompanham as próprias obras. Administradores veem todo o sistema.</p>
+        </div>
+      </li>
+    </ul>
+  </section>
+</div>
+{% endblock %}

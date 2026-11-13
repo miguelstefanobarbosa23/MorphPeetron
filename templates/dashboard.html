@@ -1,0 +1,158 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Visão geral{% endblock %}
+{% block trilha %}Visão geral{% endblock %}
+
+{% block conteudo %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Painel de controle</p>
+    <h1>Olá, {{ usuario_logado.nome.split()[0] }}</h1>
+    <p class="page-sub">Aqui está o resumo do seu canteiro de obras hoje.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('web.nova_obra') }}" class="button button--primary">
+      {{ icone('plus') }} Nova obra
+    </a>
+  </div>
+</section>
+
+<section class="stats-grid" aria-label="Resumo do sistema">
+  <article class="stat-card">
+    <span class="stat-card__icon stat-card__icon--teal">{{ icone('building') }}</span>
+    <div class="stat-card__body">
+      <span class="stat-card__value">{{ obras|length }}</span>
+      <span class="stat-card__label">{{ 'Minhas obras' if usuario_logado.eh_engenheiro() else 'Obras no sistema' }}</span>
+      <span class="stat-card__hint">{{ obras_andamento }} em andamento · {{ obras_planejadas }} planejadas</span>
+    </div>
+  </article>
+
+  <article class="stat-card">
+    <span class="stat-card__icon stat-card__icon--blue">{{ icone('users') }}</span>
+    <div class="stat-card__body">
+      <span class="stat-card__value">{{ total_clientes }}</span>
+      <span class="stat-card__label">Clientes</span>
+      <span class="stat-card__hint">cadastrados no sistema</span>
+    </div>
+  </article>
+
+  <article class="stat-card">
+    <span class="stat-card__icon stat-card__icon--green">{{ icone('tools') }}</span>
+    <div class="stat-card__body">
+      <span class="stat-card__value">{{ equipamentos_ativos|length }}</span>
+      <span class="stat-card__label">Equipamentos ativos</span>
+      <span class="stat-card__hint">de {{ total_equipamentos }} no total</span>
+    </div>
+  </article>
+
+  <article class="stat-card stat-card--attention">
+    <span class="stat-card__icon stat-card__icon--orange">{{ icone('activity') }}</span>
+    <div class="stat-card__body">
+      <span class="stat-card__value">{{ equipamentos_manutencao|length }}</span>
+      <span class="stat-card__label">Em manutenção</span>
+      <span class="stat-card__hint">equipamentos precisando de atenção</span>
+    </div>
+  </article>
+</section>
+
+<div class="dashboard-grid">
+  <section class="card">
+    <header class="card__head">
+      <div>
+        <h2>Obras recentes</h2>
+        <p>Últimos projetos cadastrados no sistema.</p>
+      </div>
+      <a href="{{ url_for('web.obras') }}" class="link-arrow">
+        Ver todas {{ icone('arrow-right') }}
+      </a>
+    </header>
+
+    {% if obras_recentes %}
+      <div class="recent-list">
+        {% for obra in obras_recentes %}
+          {% set status = status_obra(obra) %}
+          <a href="{{ url_for('web.obra_detalhe', obra_id=obra.id) }}" class="recent-item">
+            <span class="recent-item__icon">{{ icone('building') }}</span>
+            <span class="recent-item__main">
+              <strong>{{ obra.nome }}</strong>
+              <small>{{ obra.cliente_nome or 'Cliente não informado' }} · {{ obra.engenheiro_nome }}</small>
+            </span>
+            <span class="badge badge--{{ status.classe }}">{{ status.rotulo }}</span>
+            <span class="recent-item__date">{{ formatar_data(obra.data_inicio) }}</span>
+            {{ icone('chevron-right', 'icone recent-item__arrow') }}
+          </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state empty-state--compact">
+        <span class="empty-state__icon">{{ icone('building') }}</span>
+        <h3>Nenhuma obra por aqui</h3>
+        <p>Cadastre a primeira obra para começar a acompanhar os prazos.</p>
+        <a href="{{ url_for('web.nova_obra') }}" class="button button--primary button--sm">{{ icone('plus') }} Nova obra</a>
+      </div>
+    {% endif %}
+  </section>
+
+  <aside class="card">
+    <header class="card__head">
+      <div>
+        <h2>Equipamentos</h2>
+        <p>Situação atual do maquinário.</p>
+      </div>
+      <a href="{{ url_for('web.equipamentos') }}" class="link-arrow">
+        Gerenciar {{ icone('arrow-right') }}
+      </a>
+    </header>
+
+    <div class="status-split" aria-label="Resumo dos equipamentos">
+      <div class="status-split__item">
+        <span class="status-dot status-dot--success"></span>
+        <strong>{{ equipamentos_ativos|length }}</strong>
+        <small>Ativos</small>
+      </div>
+      <div class="status-split__item">
+        <span class="status-dot status-dot--warning"></span>
+        <strong>{{ equipamentos_manutencao|length }}</strong>
+        <small>Manutenção</small>
+      </div>
+    </div>
+
+    <ul class="equipment-mini">
+      {% for equipamento in (equipamentos_ativos + equipamentos_manutencao)[:5] %}
+        <li>
+          <span class="equipment-mini__icon">{{ icone('tools') }}</span>
+          <span class="equipment-mini__name">{{ equipamento.nome }}</span>
+          <span class="badge badge--{{ 'ativo' if equipamento.status == 'Ativo' else 'manutencao' }}">
+            {{ equipamento.status }}
+          </span>
+        </li>
+      {% else %}
+        <li class="equipment-mini__empty">Nenhum equipamento cadastrado.</li>
+      {% endfor %}
+    </ul>
+
+    <a href="{{ url_for('web.novo_equipamento') }}" class="button button--soft button--block">
+      {{ icone('plus') }} Cadastrar equipamento
+    </a>
+  </aside>
+</div>
+
+<section class="quick-grid" aria-label="Ações rápidas">
+  <a href="{{ url_for('web.nova_obra') }}" class="quick-card">
+    <span class="quick-card__icon">{{ icone('building') }}</span>
+    <span><strong>Cadastrar obra</strong><small>Adicione um novo projeto e defina o responsável.</small></span>
+    {{ icone('arrow-right', 'icone quick-card__arrow') }}
+  </a>
+  <a href="{{ url_for('web.novo_cliente') }}" class="quick-card">
+    <span class="quick-card__icon quick-card__icon--blue">{{ icone('users') }}</span>
+    <span><strong>Cadastrar cliente</strong><small>Guarde contatos e documentos em um só lugar.</small></span>
+    {{ icone('arrow-right', 'icone quick-card__arrow') }}
+  </a>
+  <a href="{{ url_for('web.novo_equipamento') }}" class="quick-card">
+    <span class="quick-card__icon quick-card__icon--orange">{{ icone('tools') }}</span>
+    <span><strong>Cadastrar equipamento</strong><small>Controle status e última manutenção.</small></span>
+    {{ icone('arrow-right', 'icone quick-card__arrow') }}
+  </a>
+</section>
+{% endblock %}

@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Equipamentos{% endblock %}
+{% block trilha %}Equipamentos{% endblock %}
+
+{% block conteudo %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Maquinário</p>
+    <h1>Equipamentos</h1>
+    <p class="page-sub">Controle o status e a última manutenção de cada equipamento.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('web.novo_equipamento') }}" class="button button--primary">
+      {{ icone('plus') }} Novo equipamento
+    </a>
+  </div>
+</section>
+
+<div class="toolbar toolbar--between">
+  <div class="filter-tabs" role="group" aria-label="Filtrar equipamentos por status">
+    <a href="{{ url_for('web.equipamentos', status='todos') }}"
+       class="filter-tab {{ 'is-active' if status == 'todos' }}">
+      Todos <span>{{ contagens['todos'] }}</span>
+    </a>
+    <a href="{{ url_for('web.equipamentos', status='Ativo') }}"
+       class="filter-tab {{ 'is-active' if status == 'Ativo' }}">
+      Ativos <span>{{ contagens['Ativo'] }}</span>
+    </a>
+    <a href="{{ url_for('web.equipamentos', status='Em manutenção') }}"
+       class="filter-tab {{ 'is-active' if status == 'Em manutenção' }}">
+      Em manutenção <span>{{ contagens['Em manutenção'] }}</span>
+    </a>
+  </div>
+  <span class="toolbar__hint">{{ icone('tools') }} {{ equipamentos|length }} exibidos</span>
+</div>
+
+{% if equipamentos %}
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Equipamento</th>
+          <th scope="col">Status</th>
+          <th scope="col">Última manutenção</th>
+          <th scope="col">Responsável</th>
+          <th scope="col"><span class="visually-hidden">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for equipamento in equipamentos %}
+          {% set responsavel = responsaveis.get(equipamento.responsavel_id) %}
+          <tr>
+            <td data-label="Equipamento">
+              <div class="table-identity">
+                <span class="table-icon">{{ icone('tools') }}</span>
+                <span>
+                  <strong>{{ equipamento.nome }}</strong>
+                  <small>Cadastrado em {{ formatar_data(equipamento.criado_em) }}</small>
+                </span>
+              </div>
+            </td>
+            <td data-label="Status">
+              <span class="badge badge--{{ 'ativo' if equipamento.status == 'Ativo' else 'manutencao' }}">
+                <span class="status-dot {{ 'status-dot--success' if equipamento.status == 'Ativo' else 'status-dot--warning' }}"></span>
+                {{ equipamento.status }}
+              </span>
+            </td>
+            <td data-label="Última manutenção">
+              <span class="table-text">{{ formatar_data(equipamento.data_ultima_manutencao) }}</span>
+            </td>
+            <td data-label="Responsável">
+              {% if responsavel %}
+                <div class="table-person">
+                  <span class="avatar avatar--xs">{{ iniciais(responsavel.nome) }}</span>
+                  <span>{{ responsavel.nome }}</span>
+                </div>
+              {% else %}
+                <span class="table-text">—</span>
+              {% endif %}
+            </td>
+            <td data-label="Ações">
+              <div class="row-actions">
+                <form method="post" action="{{ url_for('web.alternar_status_equipamento', equipamento_id=equipamento.id) }}">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="icon-button {{ 'icon-button--warning' if equipamento.status == 'Ativo' else 'icon-button--success' }}"
+                          aria-label="{{ 'Enviar ' ~ equipamento.nome ~ ' para manutenção' if equipamento.status == 'Ativo' else 'Marcar ' ~ equipamento.nome ~ ' como ativo' }}"
+                          title="{{ 'Enviar para manutenção' if equipamento.status == 'Ativo' else 'Marcar como ativo' }}">
+                    {{ icone('refresh') }}
+                  </button>
+                </form>
+                <a href="{{ url_for('web.editar_equipamento', equipamento_id=equipamento.id) }}"
+                   class="icon-button" aria-label="Editar {{ equipamento.nome }}" title="Editar">
+                  {{ icone('edit') }}
+                </a>
+                <form method="post" action="{{ url_for('web.excluir_equipamento', equipamento_id=equipamento.id) }}"
+                      data-confirm="Excluir o equipamento “{{ equipamento.nome }}”? Essa ação não pode ser desfeita.">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="icon-button icon-button--danger"
+                          aria-label="Excluir {{ equipamento.nome }}" title="Excluir">
+                    {{ icone('trash') }}
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-state__icon">{{ icone('tools') }}</span>
+    <h2>Nenhum equipamento {{ 'neste filtro' if status != 'todos' else 'cadastrado' }}</h2>
+    <p>
+      {% if status != 'todos' %}
+        Não há equipamentos com o status “{{ status }}”. Veja todos ou cadastre um novo.
+      {% else %}
+        Cadastre o primeiro equipamento para acompanhar manutenções e responsáveis.
+      {% endif %}
+    </p>
+    {% if status != 'todos' %}
+      <a href="{{ url_for('web.equipamentos') }}" class="button button--soft">Ver todos</a>
+    {% else %}
+      <a href="{{ url_for('web.novo_equipamento') }}" class="button button--primary">{{ icone('plus') }} Novo equipamento</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

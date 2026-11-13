@@ -1,0 +1,67 @@
+{% from "_icons.html" import icone %}
+{% set ativo = request.endpoint %}
+
+<aside class="sidebar" id="sidebar" aria-label="Navegação principal">
+  <div class="sidebar__brand">
+    <a href="{{ url_for('web.dashboard') }}" class="sidebar__brand-link" aria-label="MorphPeetron - início">
+      <img src="{{ url_for('static', filename='img/m-tron.png') }}" alt="" class="sidebar__logo">
+      <span class="sidebar__brand-text">
+        <strong>MorphPeetron</strong>
+        <small>Gestão de obras</small>
+      </span>
+    </a>
+    <button type="button" class="icon-button icon-button--dark sidebar__close" data-sidebar-toggle aria-label="Fechar menu">
+      {{ icone('x') }}
+    </button>
+  </div>
+
+  <nav class="nav">
+    <p class="nav__label">Painel</p>
+    <a href="{{ url_for('web.dashboard') }}" class="nav__item {{ 'is-active' if ativo == 'web.dashboard' }}">
+      {{ icone('home') }}<span>Início</span>
+    </a>
+    <a href="{{ url_for('web.obras') }}" class="nav__item {{ 'is-active' if ativo in ['web.obras', 'web.nova_obra', 'web.obra_detalhe', 'web.editar_obra'] }}">
+      {{ icone('building') }}<span>Obras</span>
+    </a>
+    <a href="{{ url_for('web.clientes') }}" class="nav__item {{ 'is-active' if ativo in ['web.clientes', 'web.novo_cliente', 'web.editar_cliente'] }}">
+      {{ icone('users') }}<span>Clientes</span>
+    </a>
+    <a href="{{ url_for('web.equipamentos') }}" class="nav__item {{ 'is-active' if ativo in ['web.equipamentos', 'web.novo_equipamento', 'web.editar_equipamento'] }}">
+      {{ icone('tools') }}<span>Equipamentos</span>
+    </a>
+
+    <p class="nav__label nav__label--spaced">Equipe</p>
+    <a href="{{ url_for('web.engenheiros') }}" class="nav__item {{ 'is-active' if ativo == 'web.engenheiros' }}">
+      {{ icone('hardhat') }}<span>Engenheiros</span>
+    </a>
+    <a href="{{ url_for('web.perfil') }}" class="nav__item {{ 'is-active' if ativo == 'web.perfil' }}">
+      {{ icone('user') }}<span>Meu perfil</span>
+    </a>
+  </nav>
+
+  <div class="sidebar__footer">
+    <div class="sidebar__tip">
+      {{ icone('shield') }}
+      <p><strong>Dados protegidos</strong><span>Senhas com hash e acesso por sessão.</span></p>
+    </div>
+
+    {% if usuario_logado %}
+      <div class="sidebar__user">
+        <a href="{{ url_for('web.perfil') }}" class="sidebar__user-link">
+          <span class="avatar avatar--sm">{{ iniciais(usuario_logado.nome) }}</span>
+          <span class="sidebar__user-text">
+            <strong>{{ usuario_logado.nome }}</strong>
+            <small>{{ usuario_logado.profissao }}</small>
+          </span>
+        </a>
+        <form method="post" action="{{ url_for('web.logout') }}">
+          <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+          <button type="submit" class="icon-button icon-button--dark" aria-label="Sair da conta" title="Sair">
+            {{ icone('logout') }}
+          </button>
+        </form>
+      </div>
+    {% endif %}
+  </div>
+</aside>
+<div class="sidebar-overlay" data-sidebar-overlay hidden></div>

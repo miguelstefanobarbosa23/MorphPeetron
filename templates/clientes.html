@@ -1,0 +1,109 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Clientes{% endblock %}
+{% block trilha %}Clientes{% endblock %}
+
+{% block conteudo %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Relacionamento</p>
+    <h1>Clientes</h1>
+    <p class="page-sub">
+      {{ clientes|length }} {{ 'cliente cadastrado' if clientes|length == 1 else 'clientes cadastrados' }}
+      {% if q %}para “{{ q }}”{% endif %}.
+    </p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('web.novo_cliente') }}" class="button button--primary">
+      {{ icone('plus') }} Novo cliente
+    </a>
+  </div>
+</section>
+
+<div class="toolbar">
+  <form action="{{ url_for('web.clientes') }}" method="get" class="search" role="search">
+    {{ icone('search') }}
+    <label class="visually-hidden" for="busca-clientes">Buscar clientes</label>
+    <input id="busca-clientes" type="search" name="q" value="{{ q }}"
+           placeholder="Buscar por nome, e-mail, telefone ou documento..." autocomplete="off">
+    {% if q %}
+      <a href="{{ url_for('web.clientes') }}" class="search__clear" aria-label="Limpar busca">{{ icone('x') }}</a>
+    {% endif %}
+  </form>
+</div>
+
+{% if clientes %}
+  <div class="table-card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th scope="col">Cliente</th>
+          <th scope="col">Contato</th>
+          <th scope="col">Documento</th>
+          <th scope="col">Obras</th>
+          <th scope="col"><span class="visually-hidden">Ações</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for cliente in clientes %}
+          <tr>
+            <td data-label="Cliente">
+              <div class="table-identity">
+                <span class="avatar avatar--sm">{{ iniciais(cliente.nome) }}</span>
+                <span>
+                  <strong>{{ cliente.nome }}</strong>
+                  <small>{{ cliente.email or 'Sem e-mail cadastrado' }}</small>
+                </span>
+              </div>
+            </td>
+            <td data-label="Contato">
+              <span class="table-text">{{ cliente.telefone or '—' }}</span>
+              {% if cliente.endereco %}<small class="table-subtext">{{ cliente.endereco }}</small>{% endif %}
+            </td>
+            <td data-label="Documento">
+              <span class="mono">{{ cliente.documento or '—' }}</span>
+            </td>
+            <td data-label="Obras">
+              <span class="count-pill">{{ obras_por_cliente.get(cliente.id, 0) }}</span>
+            </td>
+            <td data-label="Ações">
+              <div class="row-actions">
+                <a href="{{ url_for('web.editar_cliente', cliente_id=cliente.id) }}"
+                   class="icon-button" aria-label="Editar {{ cliente.nome }}" title="Editar">
+                  {{ icone('edit') }}
+                </a>
+                <form method="post" action="{{ url_for('web.excluir_cliente', cliente_id=cliente.id) }}"
+                      data-confirm="Excluir o cliente “{{ cliente.nome }}”? As obras dele continuarão existindo, mas sem cliente vinculado.">
+                  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+                  <button type="submit" class="icon-button icon-button--danger"
+                          aria-label="Excluir {{ cliente.nome }}" title="Excluir">
+                    {{ icone('trash') }}
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-state__icon">{{ icone('users') }}</span>
+    <h2>{{ 'Nenhum cliente encontrado' if q else 'Cadastre seu primeiro cliente' }}</h2>
+    <p>
+      {% if q %}
+        Não encontramos clientes para “{{ q }}”. Tente outro termo ou limpe a busca.
+      {% else %}
+        Guarde contatos, documentos e endereços para vincular às obras.
+      {% endif %}
+    </p>
+    {% if q %}
+      <a href="{{ url_for('web.clientes') }}" class="button button--soft">Limpar busca</a>
+    {% else %}
+      <a href="{{ url_for('web.novo_cliente') }}" class="button button--primary">{{ icone('plus') }} Novo cliente</a>
+    {% endif %}
+  </div>
+{% endif %}
+{% endblock %}

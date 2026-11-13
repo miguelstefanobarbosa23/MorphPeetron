@@ -1,0 +1,99 @@
+{% extends "auth_base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Criar conta{% endblock %}
+
+{% block conteudo %}
+<div class="auth-card auth-card--wide">
+  <header class="auth-card__head">
+    <p class="eyebrow">Primeiro acesso</p>
+    <h1>Criar sua conta</h1>
+    <p>Preencha os dados abaixo para começar a usar o MorphPeetron.</p>
+  </header>
+
+  {% if erros %}
+    <div class="alert alert--error" role="alert">
+      <span class="alert__icon">{{ icone('alert') }}</span>
+      <div>
+        <strong>Confira os dados informados:</strong>
+        <ul>
+          {% for erro in erros %}<li>{{ erro }}</li>{% endfor %}
+        </ul>
+      </div>
+    </div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('web.cadastro') }}" class="auth-form" novalidate>
+    <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}">
+
+    <div class="field">
+      <label for="nome">Nome completo</label>
+      <div class="input-wrap">
+        <span class="input-wrap__icon">{{ icone('user') }}</span>
+        <input id="nome" name="nome" type="text" class="input input--with-icon"
+               value="{{ form.get('nome', '') }}" placeholder="Como podemos chamar você?"
+               autocomplete="name" required autofocus>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid--two">
+      <div class="field">
+        <label for="email">E-mail</label>
+        <div class="input-wrap">
+          <span class="input-wrap__icon">{{ icone('mail') }}</span>
+          <input id="email" name="email" type="email" class="input input--with-icon"
+                 value="{{ form.get('email', '') }}" placeholder="voce@empresa.com"
+                 autocomplete="email" required>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="profissao">Profissão</label>
+        <div class="input-wrap">
+          <span class="input-wrap__icon">{{ icone('hardhat') }}</span>
+          <select id="profissao" name="profissao" class="input input--with-icon" required>
+            {% for profissao in profissoes %}
+              <option value="{{ profissao }}" {{ 'selected' if form.get('profissao') == profissao }}>{{ profissao }}</option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-grid form-grid--two">
+      <div class="field">
+        <label for="senha">Senha</label>
+        <div class="input-wrap">
+          <span class="input-wrap__icon">{{ icone('lock') }}</span>
+          <input id="senha" name="senha" type="password" class="input input--with-icon input--with-action"
+                 placeholder="Mínimo de 6 caracteres" autocomplete="new-password" required>
+          <button type="button" class="input-action" data-password-toggle aria-label="Mostrar senha">
+            {{ icone('eye', 'icone input-action__eye') }}
+            {{ icone('eye-off', 'icone input-action__eye-off') }}
+          </button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="confirmar_senha">Confirmar senha</label>
+        <div class="input-wrap">
+          <span class="input-wrap__icon">{{ icone('lock') }}</span>
+          <input id="confirmar_senha" name="confirmar_senha" type="password" class="input input--with-icon input--with-action"
+                 placeholder="Repita a senha" autocomplete="new-password" required>
+          <button type="button" class="input-action" data-password-toggle aria-label="Mostrar senha">
+            {{ icone('eye', 'icone input-action__eye') }}
+            {{ icone('eye-off', 'icone input-action__eye-off') }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <button type="submit" class="button button--primary button--block">
+      Criar conta
+      {{ icone('arrow-right', 'icone button__icon') }}
+    </button>
+  </form>
+
+  <p class="auth-switch">Já tem uma conta? <a href="{{ url_for('web.login') }}">Faça login</a></p>
+</div>
+{% endblock %}

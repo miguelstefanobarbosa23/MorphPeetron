@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_icons.html" import icone %}
+
+{% block titulo %}Engenheiros{% endblock %}
+{% block trilha %}Engenheiros{% endblock %}
+
+{% block conteudo %}
+<section class="page-head">
+  <div>
+    <p class="eyebrow">Equipe técnica</p>
+    <h1>Engenheiros</h1>
+    <p class="page-sub">Profissionais responsáveis pelas obras cadastradas no sistema.</p>
+  </div>
+  <div class="page-actions">
+    <a href="{{ url_for('web.cadastro') }}" class="button button--ghost">
+      {{ icone('plus') }} Adicionar profissional
+    </a>
+  </div>
+</section>
+
+{% if engenheiros %}
+  <section class="team-grid" aria-label="Engenheiros cadastrados">
+    {% for engenheiro in engenheiros %}
+      <article class="team-card">
+        <div class="team-card__top">
+          <span class="avatar avatar--lg">{{ iniciais(engenheiro.nome) }}</span>
+          <span class="badge badge--ativo">{{ engenheiro.profissao }}</span>
+        </div>
+        <h2>{{ engenheiro.nome }}</h2>
+        <p class="team-card__email">{{ icone('mail') }} {{ engenheiro.email }}</p>
+
+        <div class="team-card__stats">
+          <div>
+            <strong>{{ obras_por_engenheiro.get(engenheiro.id, 0) }}</strong>
+            <small>{{ 'obra' if obras_por_engenheiro.get(engenheiro.id, 0) == 1 else 'obras' }}</small>
+          </div>
+          <div>
+            <strong>{{ formatar_data(engenheiro.criado_em) }}</strong>
+            <small>desde</small>
+          </div>
+        </div>
+
+        <a href="{{ url_for('web.obras', q=engenheiro.nome) }}" class="button button--soft button--block">
+          {{ icone('building') }} Ver obras
+        </a>
+      </article>
+    {% endfor %}
+  </section>
+{% else %}
+  <div class="empty-state">
+    <span class="empty-state__icon">{{ icone('hardhat') }}</span>
+    <h2>Nenhum engenheiro cadastrado</h2>
+    <p>Crie uma conta com a profissão Engenheiro para que ela apareça aqui.</p>
+    <a href="{{ url_for('web.cadastro') }}" class="button button--primary">{{ icone('plus') }} Criar conta</a>
+  </div>
+{% endif %}
+{% endblock %}

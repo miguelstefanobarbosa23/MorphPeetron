@@ -1,0 +1,54 @@
+{% from "_icons.html" import icone %}
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="MorphPeetron - gestão de obras, clientes e equipamentos.">
+  <title>{% block titulo %}Entrar{% endblock %} · MorphPeetron</title>
+  <link rel="icon" type="image/png" href="{{ url_for('static', filename='img/m-tron.png') }}">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+</head>
+<body class="auth-body">
+  <main class="auth-shell">
+    <section class="auth-brand" aria-label="Sobre o MorphPeetron">
+      <div class="auth-brand__glow auth-brand__glow--one"></div>
+      <div class="auth-brand__glow auth-brand__glow--two"></div>
+
+      <div class="auth-brand__content">
+        <img src="{{ url_for('static', filename='img/morphpeetron.png') }}" alt="MorphPeetron" class="auth-brand__logo">
+        <h2>Obra organizada<br>é obra que anda.</h2>
+        <p>Centralize obras, clientes, equipamentos e equipe em um painel simples, feito para o canteiro de obras.</p>
+
+        <ul class="auth-features">
+          <li>{{ icone('check') }} <span>Acompanhe prazos e responsáveis</span></li>
+          <li>{{ icone('check') }} <span>Controle a manutenção dos equipamentos</span></li>
+          <li>{{ icone('check') }} <span>Tenha a equipe e os clientes à mão</span></li>
+        </ul>
+      </div>
+
+      <img src="{{ url_for('static', filename='img/engenheiro-m-tron.png') }}" alt="" class="auth-brand__mascot" aria-hidden="true">
+      <p class="auth-brand__footer">M-TRON Engenharia · <span>MorphPeetron</span></p>
+    </section>
+
+    <section class="auth-panel">
+      <div class="auth-panel__inner">
+        <a href="{{ url_for('web.login') }}" class="auth-panel__brand" aria-label="MorphPeetron">
+          <img src="{{ url_for('static', filename='img/m-tron.png') }}" alt="" class="auth-panel__logo">
+          <span>MorphPeetron</span>
+        </a>
+
+        {% include "_flash.html" %}
+        {% block conteudo %}{% endblock %}
+
+        <p class="auth-copy">© {{ ano_atual }} MorphPeetron · M-TRON Engenharia</p>
+      </div>
+    </section>
+  </main>
+
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: morphpeetron
+    runtime: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app --bind 0.0.0.0:$PORT
+    healthCheckPath: /login
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: FLASK_DEBUG
+        value: "0"
+      - key: AUTO_OPEN_BROWSER
+        value: "0"
+      - key: SEED_DEMO
+        value: "1"
+      - key: PYTHON_VERSION
+        value: "3.12.8"
