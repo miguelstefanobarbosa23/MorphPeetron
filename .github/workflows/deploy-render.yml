@@ -9,9 +9,9 @@ jobs:
   deploy:
     name: Avisar o Render para publicar
     runs-on: ubuntu-latest
+    env:
+      RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
     steps:
       - name: Disparar deploy
-        env:
-          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
         if: ${{ env.RENDER_DEPLOY_HOOK != '' }}
         run: curl -fsS -X POST "$RENDER_DEPLOY_HOOK"
