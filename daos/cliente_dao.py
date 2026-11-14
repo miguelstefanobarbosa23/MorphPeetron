@@ -12,7 +12,7 @@ class ClienteDAO(BaseDAO):
         """Insere o cliente, preenche cliente.id e devolve o novo id."""
         sql = """
             INSERT INTO clientes (nome, email, telefone, documento, endereco)
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s)
         """
         cliente.id, _ = self._executar(
             sql, (cliente.nome, cliente.email, cliente.telefone, cliente.documento, cliente.endereco))
@@ -20,7 +20,7 @@ class ClienteDAO(BaseDAO):
 
     # ------------------------------- READ -------------------------------
     def buscar_por_id(self, cliente_id):
-        linha = self._buscar_um("SELECT * FROM clientes WHERE id = ?", (cliente_id,))
+        linha = self._buscar_um("SELECT * FROM clientes WHERE id = %s", (cliente_id,))
         return Cliente.from_row(linha)
 
     def listar_todos(self):
@@ -32,8 +32,8 @@ class ClienteDAO(BaseDAO):
         """Atualiza todos os campos editáveis. Verifique a existência antes (buscar_por_id)."""
         sql = """
             UPDATE clientes
-               SET nome = ?, email = ?, telefone = ?, documento = ?, endereco = ?
-             WHERE id = ?
+               SET nome = %s, email = %s, telefone = %s, documento = %s, endereco = %s
+             WHERE id = %s
         """
         self._executar(
             sql, (cliente.nome, cliente.email, cliente.telefone, cliente.documento,
@@ -42,5 +42,5 @@ class ClienteDAO(BaseDAO):
     # ------------------------------ DELETE ------------------------------
     def deletar(self, cliente_id):
         """Remove o cliente. Retorna True se havia um registro para remover."""
-        _, linhas = self._executar("DELETE FROM clientes WHERE id = ?", (cliente_id,))
+        _, linhas = self._executar("DELETE FROM clientes WHERE id = %s", (cliente_id,))
         return linhas > 0

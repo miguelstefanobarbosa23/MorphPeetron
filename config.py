@@ -1,11 +1,9 @@
 """Configurações da aplicação (lidas de variáveis de ambiente / arquivo .env)."""
 import os
-from pathlib import Path
 
 from dotenv import load_dotenv
 
-BASE_DIR = Path(__file__).resolve().parent
-load_dotenv(BASE_DIR / ".env")
+load_dotenv()  # carrega o .env da raiz do projeto, se existir
 
 
 class Config:
@@ -13,22 +11,16 @@ class Config:
 
     # --- Flask ---
     DEBUG = os.getenv("FLASK_DEBUG", "1") == "1"
-    SECRET_KEY = os.getenv(
-        "SECRET_KEY", "dev-only-troque-esta-chave-em-producao-0000"
-    )
-    SESSION_COOKIE_HTTPONLY = True
-    SESSION_COOKIE_SAMESITE = "Lax"
-    SESSION_COOKIE_SECURE = os.getenv("SESSION_COOKIE_SECURE", "0") == "1"
+    # Também é a chave que assina os tokens JWT. Troque em produção!
+    SECRET_KEY = os.getenv("SECRET_KEY", "dev-only-troque-esta-chave-em-producao-0000")
 
-    # --- Banco de dados (SQLite) ---
-    # O arquivo é criado automaticamente na primeira execução.
-    DB_PATH = os.getenv("DB_PATH", str(BASE_DIR / "instance" / "morphpeetron.db"))
-    SEED_DEMO = os.getenv("SEED_DEMO", "1") == "1"
+    # --- Banco de dados (MySQL) ---
+    DB_HOST = os.getenv("DB_HOST", "localhost")
+    DB_PORT = int(os.getenv("DB_PORT", "3306"))
+    DB_USER = os.getenv("DB_USER", "root")
+    DB_PASSWORD = os.getenv("DB_PASSWORD", "")
+    DB_NAME = os.getenv("DB_NAME", "morphpeetron")
+    DB_POOL_SIZE = int(os.getenv("DB_POOL_SIZE", "5"))
 
-    # --- Servidor local ---
-    HOST = os.getenv("HOST", "127.0.0.1")
-    PORT = int(os.getenv("PORT", "5000"))
-    AUTO_OPEN_BROWSER = os.getenv("AUTO_OPEN_BROWSER", "1") == "1"
-
-    # --- Autenticação (JWT da API) ---
+    # --- Autenticação (JWT) ---
     JWT_EXPIRA_HORAS = int(os.getenv("JWT_EXPIRA_HORAS", "8"))

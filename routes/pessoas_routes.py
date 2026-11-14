@@ -1,7 +1,6 @@
 """Rotas de 'Gestão de Pessoas': listagem de engenheiros e CRUD de clientes."""
 from flask import Blueprint, jsonify
-
-from database import IntegrityError
+from mysql.connector import IntegrityError
 
 from daos import ClienteDAO, UsuarioDAO
 from models import Cliente, Usuario

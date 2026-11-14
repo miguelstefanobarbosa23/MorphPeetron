@@ -20,7 +20,7 @@ class ObraDAO(BaseDAO):
         """Insere a obra, preenche obra.id e devolve o novo id."""
         sql = """
             INSERT INTO obras (nome, descricao, data_inicio, data_fim, engenheiro_id, cliente_id)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """
         obra.id, _ = self._executar(
             sql, (obra.nome, obra.descricao, obra.data_inicio, obra.data_fim,
@@ -29,7 +29,7 @@ class ObraDAO(BaseDAO):
 
     # ------------------------------- READ -------------------------------
     def buscar_por_id(self, obra_id):
-        linha = self._buscar_um(self._SELECT_COM_JOIN + " WHERE o.id = ?", (obra_id,))
+        linha = self._buscar_um(self._SELECT_COM_JOIN + " WHERE o.id = %s", (obra_id,))
         return Obra.from_row(linha)
 
     def listar_todos(self, engenheiro_id=None):
@@ -37,7 +37,7 @@ class ObraDAO(BaseDAO):
         sql = self._SELECT_COM_JOIN
         params = ()
         if engenheiro_id is not None:
-            sql += " WHERE o.engenheiro_id = ?"
+            sql += " WHERE o.engenheiro_id = %s"
             params = (engenheiro_id,)
         sql += " ORDER BY o.data_inicio DESC, o.id DESC"
         return [Obra.from_row(linha) for linha in self._buscar_varios(sql, params)]
@@ -47,9 +47,9 @@ class ObraDAO(BaseDAO):
         """Atualiza todos os campos editáveis. Verifique a existência antes (buscar_por_id)."""
         sql = """
             UPDATE obras
-               SET nome = ?, descricao = ?, data_inicio = ?, data_fim = ?,
-                   engenheiro_id = ?, cliente_id = ?
-             WHERE id = ?
+               SET nome = %s, descricao = %s, data_inicio = %s, data_fim = %s,
+                   engenheiro_id = %s, cliente_id = %s
+             WHERE id = %s
         """
         self._executar(
             sql, (obra.nome, obra.descricao, obra.data_inicio, obra.data_fim,
@@ -58,5 +58,5 @@ class ObraDAO(BaseDAO):
     # ------------------------------ DELETE ------------------------------
     def deletar(self, obra_id):
         """Remove a obra. Retorna True se havia um registro para remover."""
-        _, linhas = self._executar("DELETE FROM obras WHERE id = ?", (obra_id,))
+        _, linhas = self._executar("DELETE FROM obras WHERE id = %s", (obra_id,))
         return linhas > 0

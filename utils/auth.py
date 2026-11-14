@@ -3,7 +3,7 @@ from datetime import datetime, timedelta, timezone
 from functools import wraps
 
 import jwt
-from flask import flash, g, redirect, request, session, url_for
+from flask import g, request
 
 from config import Config
 from utils.respostas import erro
@@ -44,19 +44,6 @@ def token_required(funcao):
             return erro("Token inválido.", 401)
 
         g.usuario_id = int(payload["sub"])  # disponível dentro das rotas protegidas
-        return funcao(*args, **kwargs)
-
-    return protegida
-
-
-def login_required(funcao):
-    """Protege páginas HTML: exige uma sessão de navegador ativa."""
-
-    @wraps(funcao)
-    def protegida(*args, **kwargs):
-        if not session.get("usuario_id"):
-            flash("Faça login para continuar.", "warning")
-            return redirect(url_for("web.login", next=request.path))
         return funcao(*args, **kwargs)
 
     return protegida

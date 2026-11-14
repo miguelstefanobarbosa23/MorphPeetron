@@ -1,7 +1,6 @@
 """Rotas de autenticação: /api/profissoes, /api/cadastro e /api/login."""
 from flask import Blueprint, jsonify
-
-from database import IntegrityError
+from mysql.connector import IntegrityError
 
 from daos import UsuarioDAO
 from models import Usuario

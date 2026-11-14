@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="MorphPeetron (M-TRON) — um super app que se transforma para cada profissão: escolha seu universo e tenha gestão, agenda, financeiro e ferramentas do seu ofício em um só lugar.">
+    <title>MorphPeetron · M-TRON — Sua profissão, sua plataforma</title>
+    <meta name="theme-color" content="#faf5ea">
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='1' x2='1' y2='0'%3E%3Cstop offset='0' stop-color='%231E7FC2'/%3E%3Cstop offset='.52' stop-color='%2317A398'/%3E%3Cstop offset='1' stop-color='%2327AE60'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath d='M10 52 V26 Q10 12 22 18 L32 38 L42 18 Q54 12 54 26 V52' stroke='url(%23g)' stroke-width='11' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+    <script>
+    /* Tema por profissão: aplica o tema salvo ANTES do CSS pintar a tela
+       (evita flash de cor errada ao carregar/atualizar a página). */
+    (function () {
+        try {
+            var tema = localStorage.getItem("mp_tema");
+            if (tema) document.documentElement.setAttribute("data-tema", tema);
+        } catch (e) { /* sem localStorage: segue com o tema padrão */ }
+    }());
+    </script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Progresso da rolagem da página (laranja → verde) -->
+    <div id="progresso-rolagem" aria-hidden="true"></div>
+
+    <!-- Área dos avisos (toasts) de sucesso / erro -->
+    <div id="avisos" class="avisos" aria-live="polite"></div>
+
+    <!-- Todo o aplicativo é renderizado aqui pelo script.js (SPA sem recarregar a página) -->
+    <main id="app"></main>
+
+    <!-- Modal genérico de formulários (criar/editar registros) -->
+    <dialog id="modal" class="modal" aria-modal="true"></dialog>
+
+    <!-- Modal de confirmação de exclusão -->
+    <dialog id="confirmacao" class="modal modal-confirmar" aria-modal="true">
+        <div class="modal-conteudo">
+            <div class="confirmar-cabecalho">
+                <span class="confirmar-icone">
+                    <svg class="icone" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 4.6 2.8 18a2 2 0 0 0 1.7 3h15a2 2 0 0 0 1.7-3L13.7 4.6a2 2 0 0 0-3.4 0z"/><path d="M12 9.5V14"/><path d="M12 17.1h.01"/></svg>
+                </span>
+                <h2 class="modal-titulo">Confirmar exclusão</h2>
+            </div>
+            <p id="confirmar-texto" class="confirmar-texto"></p>
+            <menu class="modal-acoes">
+                <button type="button" class="botao" id="confirmar-nao">Cancelar</button>
+                <button type="button" class="botao botao-primario" id="confirmar-sim">Excluir</button>
+            </menu>
+        </div>
+    </dialog>
+
+    <noscript>
+        <p style="font-family: sans-serif; padding: 2rem;">
+            O MorphPeetron precisa de JavaScript habilitado para funcionar.
+        </p>
+    </noscript>
+
+    <!-- Modo demonstração (GitHub Pages / file://): simula a API no navegador.
+         Com o Flask rodando, a API real responde primeiro e este arquivo não é acionado. -->
+    <script src="demo-api.js" defer></script>
+    <script src="script.js" defer></script>
+</body>
+</html>

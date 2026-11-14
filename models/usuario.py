@@ -10,7 +10,6 @@ class Usuario(BaseModel):
     # Opções da tela "Seleção de Profissão" (ajuste conforme o seu wireframe)
     PROFISSOES_VALIDAS = ("Engenheiro", "Arquiteto", "Técnico", "Administrador")
     PROFISSAO_ENGENHEIRO = "Engenheiro"
-    PROFISSAO_ADMIN = "Administrador"
     TAMANHO_MIN_SENHA = 6
 
     _campos_ocultos = ("senha_hash",)  # o hash nunca vai para o JSON
@@ -43,9 +42,6 @@ class Usuario(BaseModel):
     # ------------------------------ Regras ------------------------------
     def eh_engenheiro(self):
         return self.profissao == self.PROFISSAO_ENGENHEIRO
-
-    def eh_admin(self):
-        return self.profissao == self.PROFISSAO_ADMIN
 
     def validar(self):
         erros = []

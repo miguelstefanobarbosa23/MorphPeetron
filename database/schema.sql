@@ -1,56 +1,98 @@
 -- =====================================================================
--- MorphPeetron - Banco de dados SQLite
--- Criado automaticamente na primeira execução (database/connection.py)
+-- morphpeetron - Script de criação do banco (MySQL 8.0.16+ / MariaDB do XAMPP)
+-- Uso manual: mysql -u root -p < database/schema.sql
+-- (o app.py também cria tudo sozinho, via database/bootstrap.py)
 -- =====================================================================
-PRAGMA foreign_keys = ON;
+CREATE DATABASE IF NOT EXISTS morphpeetron
+    CHARACTER SET utf8mb4
+    COLLATE utf8mb4_unicode_ci;
 
+USE morphpeetron;
+
+-- ---------------------------------------------------------------------
+-- USUARIOS (engenheiros e demais profissionais)
+-- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS usuarios (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome        TEXT    NOT NULL,
-    email       TEXT    NOT NULL UNIQUE,
-    senha_hash  TEXT    NOT NULL,
-    profissao   TEXT    NOT NULL DEFAULT 'Engenheiro',
-    criado_em   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+    id          INT          NOT NULL AUTO_INCREMENT,
+    nome        VARCHAR(120) NOT NULL,
+    email       VARCHAR(150) NOT NULL,
+    senha_hash  VARCHAR(255) NOT NULL,                  -- nunca guardar senha em texto puro
+    profissao   VARCHAR(50)  NOT NULL DEFAULT 'Engenheiro',
+    criado_em   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_usuarios_email (email)
+) ENGINE=InnoDB;
 
+-- ---------------------------------------------------------------------
+-- CLIENTES
+-- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS clientes (
-    id          INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome        TEXT    NOT NULL,
-    email       TEXT,
-    telefone    TEXT,
-    documento   TEXT    UNIQUE,
-    endereco    TEXT,
-    criado_em   TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP
-);
+    id          INT          NOT NULL AUTO_INCREMENT,
+    nome        VARCHAR(120) NOT NULL,
+    email       VARCHAR(150) NULL,
+    telefone    VARCHAR(20)  NULL,
+    documento   VARCHAR(18)  NULL,                      -- CPF ou CNPJ (único quando informado)
+    endereco    VARCHAR(255) NULL,
+    criado_em   TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    UNIQUE KEY uq_clientes_documento (documento)
+) ENGINE=InnoDB;
 
+-- ---------------------------------------------------------------------
+-- OBRAS  (engenheiro responsável obrigatório; cliente opcional)
+-- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS obras (
-    id             INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome           TEXT    NOT NULL,
-    descricao      TEXT,
-    data_inicio    TEXT    NOT NULL,
-    data_fim       TEXT,
-    engenheiro_id  INTEGER NOT NULL,
-    cliente_id     INTEGER,
-    criado_em      TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (engenheiro_id) REFERENCES usuarios (id)
+    id             INT          NOT NULL AUTO_INCREMENT,
+    nome           VARCHAR(150) NOT NULL,
+    descricao      TEXT         NULL,
+    data_inicio    DATE         NOT NULL,
+    data_fim       DATE         NULL,
+    engenheiro_id  INT          NOT NULL,
+    cliente_id     INT          NULL,
+    criado_em      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    -- Não permite apagar um engenheiro que ainda tem obras
+    CONSTRAINT fk_obras_engenheiro
+        FOREIGN KEY (engenheiro_id) REFERENCES usuarios (id)
         ON DELETE RESTRICT ON UPDATE CASCADE,
-    FOREIGN KEY (cliente_id) REFERENCES clientes (id)
+    -- Se o cliente for apagado, a obra continua existindo (sem cliente)
+    CONSTRAINT fk_obras_cliente
+        FOREIGN KEY (cliente_id) REFERENCES clientes (id)
         ON DELETE SET NULL ON UPDATE CASCADE,
-    CHECK (data_fim IS NULL OR data_fim >= data_inicio)
-);
+    CONSTRAINT ck_obras_datas
+        CHECK (data_fim IS NULL OR data_fim >= data_inicio)
+) ENGINE=InnoDB;
 
+-- ---------------------------------------------------------------------
+-- EQUIPAMENTOS  (responsável opcional: usuário que responde pelo item)
+-- ---------------------------------------------------------------------
 CREATE TABLE IF NOT EXISTS equipamentos (
-    id                      INTEGER PRIMARY KEY AUTOINCREMENT,
-    nome                    TEXT    NOT NULL,
-    status                  TEXT    NOT NULL DEFAULT 'Ativo'
-        CHECK (status IN ('Ativo', 'Em manutenção')),
-    data_ultima_manutencao  TEXT,
-    responsavel_id          INTEGER,
-    criado_em               TEXT    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (responsavel_id) REFERENCES usuarios (id)
+    id                      INT          NOT NULL AUTO_INCREMENT,
+    nome                    VARCHAR(120) NOT NULL,
+    status                  ENUM('Ativo', 'Em manutenção') NOT NULL DEFAULT 'Ativo',
+    data_ultima_manutencao  DATE         NULL,
+    responsavel_id          INT          NULL,
+    criado_em               TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_equipamentos_responsavel
+        FOREIGN KEY (responsavel_id) REFERENCES usuarios (id)
         ON DELETE SET NULL ON UPDATE CASCADE
-);
+) ENGINE=InnoDB;
 
-CREATE INDEX IF NOT EXISTS idx_obras_engenheiro ON obras (engenheiro_id);
-CREATE INDEX IF NOT EXISTS idx_obras_cliente    ON obras (cliente_id);
-CREATE INDEX IF NOT EXISTS idx_equip_status     ON equipamentos (status);
+-- ---------------------------------------------------------------------
+-- ORÇAMENTOS  (material + mão de obra; o total é sempre calculado)
+-- ---------------------------------------------------------------------
+CREATE TABLE IF NOT EXISTS orcamentos (
+    id              INT           NOT NULL AUTO_INCREMENT,
+    engenheiro_id   INT           NOT NULL,
+    nome_cliente    VARCHAR(150)  NOT NULL,
+    descricao       VARCHAR(255)  NULL,
+    valor_material  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    valor_mao_obra  DECIMAL(10,2) NOT NULL DEFAULT 0.00,
+    status          ENUM('Rascunho', 'Enviado', 'Aprovado', 'Rejeitado') NOT NULL DEFAULT 'Rascunho',
+    data_criacao    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_orcamentos_engenheiro
+        FOREIGN KEY (engenheiro_id) REFERENCES usuarios (id)
+        ON DELETE RESTRICT ON UPDATE CASCADE
+) ENGINE=InnoDB;
