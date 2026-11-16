@@ -18,6 +18,18 @@ Requisição → routes/ (controller) → models/ (regras e validação) → dao
 
 ```
 morphpeetron/
+├── index.html                # Página inicial (catálogo orbital) — publicada no Pages
+├── lista.html                # Abre a SPA direto na lista de projetos/obras
+├── formulario.html           # Abre a lista com o modal "Novo projeto" já aberto
+├── css/
+│   └── style.css             # Tokens do tema (--color-*) + 8 temas de profissão
+├── js/
+│   ├── script.js             # SPA (hash router) + temas + MODO_PROFISSAO + órbita
+│   └── demo-api.js           # Modo demonstração: replica a API no navegador
+├── img/
+│   ├── mascote.png           # Mascote neutro M-TRON (login sem tema, estados vazios)
+│   └── mascotes/             # Mascotes por profissão + mini/ (miniaturas 112px)
+├── .nojekyll                 # Publica os arquivos como estão (sem processar Jekyll)
 ├── app.py                    # Application Factory + CORS + rotas do front + bootstrap
 ├── config.py                 # Configurações (lidas do .env)
 ├── requirements.txt
@@ -50,22 +62,20 @@ morphpeetron/
 ├── utils/
 │   ├── auth.py               # JWT: gerar_token + token_required
 │   └── respostas.py          # Helpers de erro/JSON
-└── static/                   # Front-end servido pelo próprio Flask
+└── static/                   # Front-end servido pelo próprio Flask (python app.py)
     ├── index.html            # SPA + script anti-flash do tema (antes do CSS)
-    ├── style.css             # Tokens do tema (--color-*) + 8 temas de profissão
-    ├── script.js             # SPA (hash router) + temas + MODO_PROFISSAO + motor orbital
-    ├── demo-api.js           # Modo demonstração: replica a API no navegador (GitHub Pages)
-    ├── mascote.png           # Mascote neutro M-TRON (login sem tema, estados vazios)
-    └── mascotes/             # Mascotes por profissão (catálogo orbital/universos)
-        ├── arquitetura.png   # Engenheiro de tijolo (blob/etiqueta em CSS)
-        ├── medicina.png … artes.png  # Recortes do collage oficial, fundo transparente
-        └── mini/             # Miniaturas (112px) para dots, chips e cartões
+    ├── style.css             # Tokens do tema + 8 temas de profissão
+    ├── script.js             # SPA (hash router) + temas + motor orbital
+    ├── demo-api.js           # Modo demonstração (usado no GitHub Pages)
+    ├── mascote.png
+    └── mascotes/             # Mascotes por profissão
+        └── mini/             # Miniaturas para dots, chips e cartões
 ```
 
-> **`docs/` (no repositório):** cópia do conteúdo de `static/` com os caminhos
-> de assets convertidos para relativos — é a pasta que o **GitHub Pages**
-> publica (`main:/docs`). Regenerar após alterar o `static/` (ver seção
-> GitHub Pages abaixo).
+> **Raiz x `static/`:** os arquivos da **raiz** (`index.html`, `lista.html`,
+> `formulario.html`, `css/`, `js/`, `img/`) formam o site publicado no GitHub
+> Pages. A pasta `static/` continua sendo a cópia que o **Flask** serve em
+> `http://127.0.0.1:5000`, então o back-end roda sem depender da raiz do repo.
 
 ## Como rodar (guia rápido de apresentação)
 
@@ -98,10 +108,20 @@ universos; o login fica em `#/login` (ou no botão "Entrar" do cabeçalho).
 O projeto está publicado (sem servidor) em:
 **https://miguelstefanobarbosa23.github.io/MorphPeetron/**
 
-O Pages publica só HTML/CSS/JS — lá não existem Flask nem MySQL. Para o site
-continuar navegável, o `demo-api.js` **replica a API completa no navegador**
-(mesmas rotas, contratos, códigos HTTP e o mesmo seed do `bootstrap.py`),
-salvando os dados no `localStorage` de quem está vendo:
+O Pages publica a **raiz do repositório** (`main:/`), direto dos arquivos
+`index.html`, `lista.html`, `formulario.html`, `css/`, `js/` e `img/` — não há
+build nem passo de cópia. O arquivo `.nojekyll` garante que tudo seja servido
+como está.
+
+- **`index.html`** — catálogo orbital de profissões (página inicial);
+- **`lista.html`** — abre a SPA já na lista de projetos/obras (pede login e
+  volta para a lista depois de entrar);
+- **`formulario.html`** — abre a lista com o modal **"Novo projeto"** aberto.
+
+No Pages não existem Flask nem MySQL. Para o site continuar navegável, o
+`demo-api.js` **replica a API completa no navegador** (mesmas rotas, contratos,
+códigos HTTP e o mesmo seed do `bootstrap.py`), salvando os dados no
+`localStorage` de quem está vendo:
 
 - Como funciona: quando o `fetch` para `/api/...` falha (ou o servidor responde
   algo que não é JSON), o `script.js` cai automaticamente no modo demonstração
@@ -110,17 +130,16 @@ salvando os dados no `localStorage` de quem está vendo:
   modo demonstração nem é acionado — nada muda no comportamento local;
 - A conta de demonstração também funciona no Pages: `maria@exemplo.com` / `123456`.
 
-### Como regenerar a pasta `docs/` (deploy do front)
+### Como atualizar o site publicado
 
-O Pages está configurado para publicar a branch `main`, pasta `/docs`. Após
-qualquer mudança no `static/`, copie o conteúdo para `docs/` e troque os
-caminhos `/static/...` por relativos (o Flask serve na raiz; o Pages, em
-`/MorphPeetron/`):
+Não existe pasta de build: o Pages serve a raiz da branch `main`. Depois de
+alterar qualquer arquivo de `index.html`, `lista.html`, `formulario.html`,
+`css/`, `js/` ou `img/`:
 
-1. Copie todo o conteúdo de `static/` para `docs/`;
-2. Em `docs/index.html` e `docs/script.js`, substitua `/static/` por nada
-   (`/static/style.css` → `style.css`, `/static/mascotes/...` → `mascotes/...`);
-3. Envie para a branch `main` — o GitHub Pages recompila sozinho.
+1. Envie para a branch `main`;
+2. O GitHub Pages recompila sozinho (acompanhe em *Settings → Pages*);
+3. Se uma página recém-criada responder 404, aguarde alguns minutos: o CDN do
+   Pages guarda a resposta antiga por até ~10 minutos.
 
 
 ## Identidade visual e experiência

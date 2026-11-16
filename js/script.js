@@ -283,7 +283,7 @@ function mascoteAtual() {
 const msgErro = (excecao) => (excecao instanceof Error ? excecao.message : String(excecao));
 
 /* ----------------------- Cliente HTTP (Fetch API) ----------------------- */
-/* No GitHub Pages (docs/) não existe back-end: quando o fetch falha ou o
+/* No GitHub Pages (raiz do repositório) não existe back-end: quando o fetch falha ou o
    GitHub responde 404 em HTML para /api/..., a chamada cai no MODO
    DEMONSTRAÇÃO (demo-api.js), que replica a API Flask no navegador. Com o
    Flask rodando, a API REAL responde primeiro e o demo não é acionado. */
@@ -1096,6 +1096,7 @@ function logotipoSVG(classe = "") {
 
 function renderShell(conteudoHTML, titulo, subtitulo = "", mascoteTopo = false) {
     const atual = location.hash;
+    document.title = `${titulo} · MorphPeetron`;
     const m = modo();
     /* O menu é o mesmo para todos, mas fala o idioma da profissão:
        em Medicina é "Atendimentos", em Arquitetura é "Projetos"... */
@@ -2640,6 +2641,12 @@ function rotear() {
    na rota desejada (sem precisar navegar pelo menu). */
 if (!location.hash && window.MP_ROTA_INICIAL) {
     history.replaceState(null, "", window.MP_ROTA_INICIAL);
+}
+
+/* Sessão ainda não existe: depois do login a pessoa volta para a rota que a
+   página pediu (vale mesmo que a URL já esteja em #/login, após recarregar). */
+if (!State.token && window.MP_ROTA_INICIAL && ROTAS_PROTEGIDAS.has(window.MP_ROTA_INICIAL)) {
+    State.destinoAposLogin = window.MP_ROTA_INICIAL;
 }
 
 window.addEventListener("hashchange", rotear);
