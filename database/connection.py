@@ -3,7 +3,7 @@ import threading
 
 from mysql.connector import pooling
 
-from config import Config
+from core.config import Config
 
 
 class Database:

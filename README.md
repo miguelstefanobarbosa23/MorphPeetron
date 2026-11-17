@@ -19,8 +19,9 @@ Requisição → routes/ (controller) → models/ (regras e validação) → dao
 ```
 morphpeetron/
 ├── index.html                # Página inicial (catálogo orbital) — publicada no Pages
-├── lista.html                # Abre a SPA direto na lista de projetos/obras
-├── formulario.html           # Abre a lista com o modal "Novo projeto" já aberto
+├── pages/
+│   ├── lista.html            # Abre a SPA direto na lista de projetos/obras
+│   └── formulario.html       # Abre a lista com o modal "Novo projeto" já aberto
 ├── css/
 │   └── style.css             # Tokens do tema (--color-*) + 8 temas de profissão
 ├── js/
@@ -30,8 +31,10 @@ morphpeetron/
 │   ├── mascote.png           # Mascote neutro M-TRON (login sem tema, estados vazios)
 │   └── mascotes/             # Mascotes por profissão + mini/ (miniaturas 112px)
 ├── .nojekyll                 # Publica os arquivos como estão (sem processar Jekyll)
-├── app.py                    # Application Factory + CORS + rotas do front + bootstrap
-├── config.py                 # Configurações (lidas do .env)
+├── app.py                    # Entrada do Flask/Gunicorn (fica na raiz do projeto)
+├── core/
+│   ├── __init__.py
+│   └── config.py             # Configurações (lidas do .env)
 ├── requirements.txt
 ├── .env.example
 ├── daos/                     # Acesso a dados (SQL puro, parametrizado)
@@ -55,10 +58,16 @@ morphpeetron/
 │   ├── equipamento_routes.py
 │   ├── orcamento_routes.py
 │   └── resumo_routes.py
-├── database/
+├── database/                 # Tudo relacionado ao banco de dados
 │   ├── connection.py         # Pool de conexões
 │   ├── schema.sql            # CREATE DATABASE/TABLES (IF NOT EXISTS)
-│   └── bootstrap.py          # Cria o banco e popula o SEED automático
+│   ├── seed.py               # Dados de demonstração
+│   ├── bootstrap.py          # Cria o banco e popula o SEED automático
+│   ├── main.sql              # Script SQL da modelagem (importação manual no MySQL)
+│   ├── documentacao/         # PDFs do modelo conceitual e lógico
+│   │   ├── Conceitual - BRMW.pdf
+│   │   └── Logico - BRMW.pdf
+│   └── instance/             # Banco SQLite local antigo (ignorado pelo Git)
 ├── utils/
 │   ├── auth.py               # JWT: gerar_token + token_required
 │   └── respostas.py          # Helpers de erro/JSON
@@ -72,10 +81,10 @@ morphpeetron/
         └── mini/             # Miniaturas para dots, chips e cartões
 ```
 
-> **Raiz x `static/`:** os arquivos da **raiz** (`index.html`, `lista.html`,
-> `formulario.html`, `css/`, `js/`, `img/`) formam o site publicado no GitHub
-> Pages. A pasta `static/` continua sendo a cópia que o **Flask** serve em
-> `http://127.0.0.1:5000`, então o back-end roda sem depender da raiz do repo.
+> **Raiz x `static/`:** os arquivos da **raiz** (`index.html`, `pages/`, `css/`,
+> `js/`, `img/`) formam o site publicado no GitHub Pages. A pasta `static/`
+> continua sendo a cópia que o **Flask** serve em `http://127.0.0.1:5000`, então
+> o back-end roda sem depender da raiz do repo.
 
 ## Como rodar (guia rápido de apresentação)
 
@@ -100,8 +109,9 @@ universos; o login fica em `#/login` (ou no botão "Entrar" do cabeçalho).
 **Login de demonstração (criado pelo seed):** `maria@exemplo.com` / `123456`
 
 > O seed só roda em tabelas vazias: reiniciar o servidor nunca duplica dados nem
-> apaga o que você cadastrou. Se já existia um banco antigo do `main.sql`,
-> use `DROP DATABASE morphpeetron;` antes de rodar para começar limpo.
+> apaga o que você cadastrou. Se já existia um banco antigo do
+> `database/main.sql`, use `DROP DATABASE morphpeetron;` antes de rodar para
+> começar limpo.
 
 ## Site no GitHub Pages (modo demonstração)
 
@@ -109,14 +119,16 @@ O projeto está publicado (sem servidor) em:
 **https://miguelstefanobarbosa23.github.io/MorphPeetron/**
 
 O Pages publica a **raiz do repositório** (`main:/`), direto dos arquivos
-`index.html`, `lista.html`, `formulario.html`, `css/`, `js/` e `img/` — não há
-build nem passo de cópia. O arquivo `.nojekyll` garante que tudo seja servido
-como está.
+`index.html`, `pages/`, `css/`, `js/` e `img/` — não há build nem passo de
+cópia. O arquivo `.nojekyll` garante que tudo seja servido como está.
 
 - **`index.html`** — catálogo orbital de profissões (página inicial);
-- **`lista.html`** — abre a SPA já na lista de projetos/obras (pede login e
-  volta para a lista depois de entrar);
-- **`formulario.html`** — abre a lista com o modal **"Novo projeto"** aberto.
+- **`pages/lista.html`** — abre a SPA já na lista de projetos/obras (pede login
+  e volta para a lista depois de entrar):
+  **https://miguelstefanobarbosa23.github.io/MorphPeetron/pages/lista.html**
+- **`pages/formulario.html`** — abre a lista com o modal **"Novo projeto"**
+  aberto:
+  **https://miguelstefanobarbosa23.github.io/MorphPeetron/pages/formulario.html**
 
 No Pages não existem Flask nem MySQL. Para o site continuar navegável, o
 `demo-api.js` **replica a API completa no navegador** (mesmas rotas, contratos,
@@ -133,8 +145,7 @@ códigos HTTP e o mesmo seed do `bootstrap.py`), salvando os dados no
 ### Como atualizar o site publicado
 
 Não existe pasta de build: o Pages serve a raiz da branch `main`. Depois de
-alterar qualquer arquivo de `index.html`, `lista.html`, `formulario.html`,
-`css/`, `js/` ou `img/`:
+alterar qualquer arquivo de `index.html`, `pages/`, `css/`, `js/` ou `img/`:
 
 1. Envie para a branch `main`;
 2. O GitHub Pages recompila sozinho (acompanhe em *Settings → Pages*);

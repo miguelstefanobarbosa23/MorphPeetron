@@ -9,7 +9,7 @@ from flask import Flask, send_from_directory
 from flask_cors import CORS
 from mysql.connector import Error as ErroMySQL
 
-from config import Config
+from core.config import Config
 from database.bootstrap import inicializar_banco
 from models import ErroDeValidacao
 from routes import registrar_blueprints

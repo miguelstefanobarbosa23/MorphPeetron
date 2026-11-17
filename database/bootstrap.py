@@ -14,7 +14,7 @@ from pathlib import Path
 import mysql.connector
 from mysql.connector import Error as ErroMySQL
 
-from config import Config
+from core.config import Config
 
 logger = logging.getLogger("morphpeetron.bootstrap")
 

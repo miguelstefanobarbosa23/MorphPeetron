@@ -5,7 +5,7 @@ from functools import wraps
 import jwt
 from flask import g, request
 
-from config import Config
+from core.config import Config
 from utils.respostas import erro
 
 
